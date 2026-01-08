@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MangaFU - Магазин манги</title>
+    <style>
+        /* Встроенные стили только для темы и базового оформления */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --header-color: #333333;
+            --accent-color: #e53935;
+            --border-color: #dddddd;
+            --card-bg: #f9f9f9;
+            --input-bg: #ffffff;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s;
+        }
+        
+        body.dark-theme {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --header-color: #e0e0e0;
+            --accent-color: #ff5252;
+            --border-color: #444444;
+            --card-bg: #2a2a2a;
+            --input-bg: #333333;
+        }
+        
+        header {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .theme-switcher {
+            padding: 0.5rem 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .auth-form {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            max-width: 400px;
+            margin: 2rem auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .section-title {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .manga-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .manga-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .manga-title {
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        .admin-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .crud-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .message {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--accent-color);
+            background-color: var(--card-bg);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        
+        nav {
+            margin: 1rem 0;
+        }
+        
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-right: 1rem;
+            padding: 0.5rem;
+        }
+        
+        nav a:hover {
+            text-decoration: underline;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">MangaFU</div>
+        <div class="user-info">
+            <span id="current-user">Гость</span>
+            <span id="user-role" class="role-badge hidden">Гость</span>
+            <button id="auth-toggle" onclick="toggleAuthForm()">Войти</button>
+            <button id="logout-btn" class="hidden" onclick="logout()">Выйти</button>
+            <button class="theme-switcher" onclick="toggleTheme()">Темная тема</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <nav>
+            <a href="#manga-list">Каталог манги</a>
+            <a href="#cart" id="cart-link">Корзина</a>
+            <a href="#orders" id="orders-link" class="hidden">Мои заказы</a>
+            <a href="#admin-panel" id="admin-link" class="hidden">Админ-панель</a>
+        </nav>
+        
+        <!-- Форма авторизации -->
+        <div id="auth-form" class="auth-form hidden">
+            <h2>Вход в систему</h2>
+            <form onsubmit="handleAuth(event)">
+                <div class="form-group">
+                    <label for="username">Имя пользователя:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Роль:</label>
+                    <select id="role" name="role">
+                        <option value="user">Пользователь</option>
+                        <option value="admin">Администратор</option>
+                        <option value="moderator">Модератор</option>
+                    </select>
+                </div>
+                <button type="submit">Войти</button>
+            </form>
+            <p>Для демонстрации используйте любые данные. Роль влияет на доступные функции.</p>
+        </div>
+        
+        <!-- Главная страница -->
+        <div id="main-content">
+            <h1>Добро пожаловать в MangaFU</h1>
+            <p>Лучший магазин манги в рунете! У нас вы найдете самые популярные тайтлы и редкие издания.</p>
+            
+            <!-- Каталог манги -->
+            <h2 id="manga-list" class="section-title">Популярная манга</h2>
+            <div class="manga-grid">
+                <div class="manga-card">
+                    <div class="manga-title">One Piece</div>
+                    <div>Том 1-100</div>
+                    <div>Цена: 500 руб./том</div>
+                    <button onclick="addToCart('One Piece', 1)">В корзину</button>
+                </div>
+                <div class="manga-card">
+                    <div class="manga-title">Attack on Titan</div>
+                    <div>Том 1-34</div>
+                    <div>Цена: 450 руб./том</div>
+                    <button onclick="addToCart('Attack on Titan', 1)">В корзину</button>
+                </div>
+                <div class="manga-card">
+                    <div class="manga-title">Naruto</div>
+                    <div>Том 1-72</div>
+                    <div>Цена: 400 руб./том</div>
+                    <button onclick="addToCart('Naruto', 1)">В корзину</button>
+                </div>
+                <div class="manga-card">
+                    <div class="manga-title">My Hero Academia</div>
+                    <div>Том 1-35</div>
+                    <div>Цена: 480 руб./том</div>
+                    <button onclick="addToCart('My Hero Academia', 1)">В корзину</button>
+                </div>
+            </div>
+            
+            <!-- Корзина -->
+            <h2 id="cart" class="section-title">Корзина</h2>
+            <div id="cart-items">
+                <p>Корзина пуста. Добавьте товары из каталога.</p>
+            </div>
+            <div id="cart-actions" class="hidden">
+                <button onclick="checkout()">Оформить заказ</button>
+                <button onclick="clearCart()">Очистить корзину</button>
+            </div>
+            
+            <!-- Заказы пользователя -->
+            <div id="user-orders" class="hidden">
+                <h2 id="orders" class="section-title">Мои заказы</h2>
+                <div id="orders-list">
+                    <!-- Здесь будут отображаться заказы пользователя -->
+                </div>
+            </div>
+            
+            <!-- Админ-панель -->
+            <div id="admin-panel" class="admin-panel hidden">
+                <h2>Административная панель</h2>
+                <p>Добро пожаловать в админ-панель MangaFU. Здесь вы можете управлять каталогом манги, заказами и пользователями.</p>
+                
+                <!-- CRUD операции для манги -->
+                <h3>Управление каталогом манги</h3>
+                <div class="crud-actions">
+                    <button onclick="showCreateForm()">Добавить мангу</button>
+                    <button onclick="showEditForm()">Редактировать мангу</button>
+                    <button onclick="showDeleteForm()">Удалить мангу</button>
+                </div>
+                
+                <!-- Форма создания манги -->
+                <div id="create-form" class="auth-form hidden">
+                    <h4>Добавить новую мангу</h4>
+                    <form onsubmit="createManga(event)">
+                        <div class="form-group">
+                            <label for="manga-title">Название:</label>
+                            <input type="text" id="manga-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="manga-author">Автор:</label>
+                            <input type="text" id="manga-author" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="manga-price">Цена:</label>
+                            <input type="number" id="manga-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="manga-stock">Количество на складе:</label>
+                            <input type="number" id="manga-stock" required>
+                        </div>
+                        <button type="submit">Добавить</button>
+                        <button type="button" onclick="hideCreateForm()">Отмена</button>
+                    </form>
+                </div>
+                
+                <!-- Форма редактирования манги -->
+                <div id="edit-form" class="auth-form hidden">
+                    <h4>Редактировать мангу</h4>
+                    <form onsubmit="updateManga(event)">
+                        <div class="form-group">
+                            <label for="edit-manga-id">ID манги:</label>
+                            <input type="text" id="edit-manga-id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-manga-title">Новое название:</label>
+                            <input type="text" id="edit-manga-title">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-manga-price">Новая цена:</label>
+                            <input type="number" id="edit-manga-price">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-manga-stock">Новое количество:</label>
+                            <input type="number" id="edit-manga-stock">
+                        </div>
+                        <button type="submit">Обновить</button>
+                        <button type="button" onclick="hideEditForm()">Отмена</button>
+                    </form>
+                </div>
+                
+                <!-- Форма удаления манги -->
+                <div id="delete-form" class="auth-form hidden">
+                    <h4>Удалить мангу</h4>
+                    <form onsubmit="deleteManga(event)">
+                        <div class="form-group">
+                            <label for="delete-manga-id">ID манги для удаления:</label>
+                            <input type="text" id="delete-manga-id" required>
+                        </div>
+                        <button type="submit">Удалить</button>
+                        <button type="button" onclick="hideDeleteForm()">Отмена</button>
+                    </form>
+                </div>
+                
+                <!-- Управление заказами -->
+                <h3>Управление заказами</h3>
+                <div class="crud-actions">
+                    <button onclick="viewAllOrders()">Просмотреть все заказы</button>
+                    <button onclick="updateOrderStatus()">Изменить статус заказа</button>
+                </div>
+                
+                <!-- Управление пользователями -->
+                <h3>Управление пользователями</h3>
+                <div class="crud-actions">
+                    <button onclick="viewAllUsers()">Просмотреть всех пользователей</button>
+                    <button onclick="changeUserRole()">Изменить роль пользователя</button>
+                </div>
+                
+                <!-- Сообщения для администратора -->
+                <div id="admin-message" class="message hidden">
+                    <!-- Здесь будут отображаться сообщения для администратора -->
+                </div>
+            </div>
+            
+            <!-- Информационное сообщение -->
+            <div id="message" class="message hidden">
+                <!-- Здесь будут отображаться сообщения для пользователя -->
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>MangaFU &copy; 2023. Все права на мангу принадлежат их правообладателям.</p>
+        <p>Это демонстрационный сайт для учебных целей.</p>
+    </footer>
+
+    <script>
+        // Состояние приложения
+        let currentUser = null;
+        let currentRole = 'guest';
+        let cart = [];
+        let orders = [];
+        let isDarkTheme = false;
+        
+        // Элементы DOM
+        const authForm = document.getElementById('auth-form');
+        const authToggle = document.getElementById('auth-toggle');
+        const logoutBtn = document.getElementById('logout-btn');
+        const currentUserSpan = document.getElementById('current-user');
+        const userRoleSpan = document.getElementById('user-role');
+        const cartLink = document.getElementById('cart-link');
+        const ordersLink = document.getElementById('orders-link');
+        const adminLink = document.getElementById('admin-link');
+        const userOrders = document.getElementById('user-orders');
+        const adminPanel = document.getElementById('admin-panel');
+        const cartItems = document.getElementById('cart-items');
+        const cartActions = document.getElementById('cart-actions');
+        const messageDiv = document.getElementById('message');
+        const adminMessageDiv = document.getElementById('admin-message');
+        const ordersList = document.getElementById('orders-list');
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+        });
+        
+        // Переключение темы
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+            document.querySelector('.theme-switcher').textContent = isDarkTheme ? 'Светлая тема' : 'Темная тема';
+        }
+        
+        // Переключение формы авторизации
+        function toggleAuthForm() {
+            authForm.classList.toggle('hidden');
+        }
+        
+        // Обработка авторизации
+        function handleAuth(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            
+            // В реальном приложении здесь был бы запрос к серверу
+            currentUser = username;
+            currentRole = role;
+            
+            // Сохраняем в sessionStorage для имитации сессии
+            sessionStorage.setItem('mangafu_user', username);
+            sessionStorage.setItem('mangafu_role', role);
+            
+            // Показываем сообщение
+            showMessage(`Добро пожаловать, ${username}! Вы вошли как ${getRoleName(role)}.`);
+            
+            // Обновляем интерфейс
+            updateUI();
+            
+            // Скрываем форму
+            authForm.classList.add('hidden');
+        }
+        
+        // Выход из системы
+        function logout() {
+            currentUser = null;
+            currentRole = 'guest';
+            
+            // Очищаем sessionStorage
+            sessionStorage.removeItem('mangafu_user');
+            sessionStorage.removeItem('mangafu_role');
+            
+            // Показываем сообщение
+            showMessage('Вы вышли из системы.');
+            
+            // Обновляем интерфейс
+            updateUI();
+        }
+        
+        // Обновление интерфейса в зависимости от роли
+        function updateUI() {
+            // Проверяем, есть ли сохраненная сессия
+            const savedUser = sessionStorage.getItem('mangafu_user');
+            const savedRole = sessionStorage.getItem('mangafu_role');
+            
+            if (savedUser && savedRole) {
+                currentUser = savedUser;
+                currentRole = savedRole;
+            }
+            
+            // Обновляем отображение информации о пользователе
+            if (currentUser) {
+                currentUserSpan.textContent = currentUser;
+                userRoleSpan.textContent = getRoleName(currentRole);
+                userRoleSpan.classList.remove('hidden');
+                authToggle.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                currentUserSpan.textContent = 'Гость';
+                userRoleSpan.classList.add('hidden');
+                authToggle.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+            
+            // Обновляем видимость элементов в зависимости от роли
+            // Корзина и заказы доступны всем авторизованным пользователям
+            cartLink.classList.toggle('hidden', !currentUser);
+            
+            // Заказы доступны пользователям и администраторам
+            const showOrders = currentUser && (currentRole === 'user' || currentRole === 'admin' || currentRole === 'moderator');
+            ordersLink.classList.toggle('hidden', !showOrders);
+            userOrders.classList.toggle('hidden', !showOrders);
+            
+            // Админ-панель доступна только администраторам и модераторам
+            const showAdminPanel = currentRole === 'admin' || currentRole === 'moderator';
+            adminLink.classList.toggle('hidden', !showAdminPanel);
+            adminPanel.classList.toggle('hidden', !showAdminPanel);
+            
+            // Обновляем корзину
+            updateCartDisplay();
+            
+            // Обновляем список заказов
+            updateOrdersDisplay();
+        }
+        
+        // Получение названия роли
+        function getRoleName(role) {
+            switch(role) {
+                case 'admin': return 'Администратор';
+                case 'moderator': return 'Модератор';
+                case 'user': return 'Пользователь';
+                default: return 'Гость';
+            }
+        }
+        
+        // Добавление товара в корзину
+        function addToCart(mangaTitle, quantity) {
+            if (!currentUser) {
+                showMessage('Для добавления товаров в корзину необходимо авторизоваться.');
+                toggleAuthForm();
+                return;
+            }
+            
+            // Проверяем, есть ли уже этот товар в корзине
+            const existingItem = cart.find(item => item.title === mangaTitle);
+            
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    title: mangaTitle,
+                    quantity: quantity,
+                    price: 500 // В реальном приложении цена бралась бы из базы данных
+                });
+            }
+            
+            showMessage(`"${mangaTitle}" добавлен в корзину.`);
+            updateCartDisplay();
+        }
+        
+        // Обновление отображения корзины
+        function updateCartDisplay() {
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Корзина пуста. Добавьте товары из каталога.</p>';
+                cartActions.classList.add('hidden');
+                return;
+            }
+            
+            let html = '<h3>Товары в корзине:</h3><ul>';
+            let total = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                html += `<li>${item.title} - ${item.quantity} шт. - ${itemTotal} руб.</li>`;
+            });
+            
+            html += `</ul><p><strong>Итого: ${total} руб.</strong></p>`;
+            cartItems.innerHTML = html;
+            cartActions.classList.remove('hidden');
+        }
+        
+        // Очистка корзины
+        function clearCart() {
+            cart = [];
+            showMessage('Корзина очищена.');
+            updateCartDisplay();
+        }
+        
+        // Оформление заказа
+        function checkout() {
+            if (cart.length === 0) {
+                showMessage('Корзина пуста. Добавьте товары перед оформлением заказа.');
+                return;
+            }
+            
+            // Создаем заказ
+            const orderId = Date.now(); // Простой ID на основе времени
+            const orderTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const order = {
+                id: orderId,
+                date: new Date().toLocaleDateString(),
+                items: [...cart],
+                total: orderTotal,
+                status: 'В обработке'
+            };
+            
+            orders.push(order);
+            
+            // Очищаем корзину
+            cart = [];
+            
+            // Показываем сообщение
+            showMessage(`Заказ #${orderId} успешно оформлен! Сумма: ${orderTotal} руб.`);
+            
+            // Обновляем отображение
+            updateCartDisplay();
+            updateOrdersDisplay();
+        }
+        
+        // Обновление отображения заказов
+        function updateOrdersDisplay() {
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p>У вас пока нет заказов.</p>';
+                return;
+            }
+            
+            let html = '<h3>История заказов:</h3>';
+            
+            orders.forEach(order => {
+                html += `
+                    <div class="manga-card">
+                        <div class="manga-title">Заказ #${order.id}</div>
+                        <div>Дата: ${order.date}</div>
+                        <div>Статус: ${order.status}</div>
+                        <div>Товаров: ${order.items.length}</div>
+                        <div>Сумма: ${order.total} руб.</div>
+                    </div>
+                `;
+            });
+            
+            ordersList.innerHTML = html;
+        }
+        
+        // Функции для админ-панели
+        
+        // Показать форму создания манги
+        function showCreateForm() {
+            document.getElementById('create-form').classList.remove('hidden');
+            document.getElementById('edit-form').classList.add('hidden');
+            document.getElementById('delete-form').classList.add('hidden');
+        }
+        
+        // Скрыть форму создания манги
+        function hideCreateForm() {
+            document.getElementById('create-form').classList.add('hidden');
+        }
+        
+        // Создание новой манги (заглушка для CRUD Create)
+        function createManga(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('manga-title').value;
+            const author = document.getElementById('manga-author').value;
+            const price = document.getElementById('manga-price').value;
+            const stock = document.getElementById('manga-stock').value;
+            
+            // В реальном приложении здесь был бы запрос к серверу
+            showAdminMessage(`Манга "${title}" успешно добавлена в каталог.`);
+            
+            // Очищаем форму
+            document.getElementById('create-form').querySelector('form').reset();
+            hideCreateForm();
+        }
+        
+        // Показать форму редактирования манги
+        function showEditForm() {
+            document.getElementById('edit-form').classList.remove('hidden');
+            document.getElementById('create-form').classList.add('hidden');
+            document.getElementById('delete-form').classList.add('hidden');
+        }
+        
+        // Скрыть форму редактирования манги
+        function hideEditForm() {
+            document.getElementById('edit-form').classList.add('hidden');
+        }
+        
+        // Обновление манги (заглушка для CRUD Update)
+        function updateManga(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('edit-manga-id').value;
+            const title = document.getElementById('edit-manga-title').value;
+            const price = document.getElementById('edit-manga-price').value;
+            const stock = document.getElementById('edit-manga-stock').value;
+            
+            // В реальном приложении здесь был бы запрос к серверу
+            showAdminMessage(`Манга с ID ${id} успешно обновлена.`);
+            
+            // Очищаем форму
+            document.getElementById('edit-form').querySelector('form').reset();
+            hideEditForm();
+        }
+        
+        // Показать форму удаления манги
+        function showDeleteForm() {
+            document.getElementById('delete-form').classList.remove('hidden');
+            document.getElementById('create-form').classList.add('hidden');
+            document.getElementById('edit-form').classList.add('hidden');
+        }
+        
+        // Скрыть форму удаления манги
+        function hideDeleteForm() {
+            document.getElementById('delete-form').classList.add('hidden');
+        }
+        
+        // Удаление манги (заглушка для CRUD Delete)
+        function deleteManga(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('delete-manga-id').value;
+            
+            // В реальном приложении здесь был бы запрос к серверу
+            showAdminMessage(`Манга с ID ${id} успешно удалена из каталога.`);
+            
+            // Очищаем форму
+            document.getElementById('delete-form').querySelector('form').reset();
+            hideDeleteForm();
+        }
+        
+        // Другие функции админ-панели (заглушки)
+        function viewAllOrders() {
+            showAdminMessage('Функция просмотра всех заказов будет реализована в динамической версии приложения.');
+        }
+        
+        function updateOrderStatus() {
+            showAdminMessage('Функция изменения статуса заказа будет реализована в динамической версии приложения.');
+        }
+        
+        function viewAllUsers() {
+            showAdminMessage('Функция просмотра всех пользователей будет реализована в динамической версии приложения.');
+        }
+        
+        function changeUserRole() {
+            showAdminMessage('Функция изменения роли пользователя будет реализована в динамической версии приложения.');
+        }
+        
+        // Показать сообщение для пользователя
+        function showMessage(text) {
+            messageDiv.textContent = text;
+            messageDiv.classList.remove('hidden');
+            
+            // Автоматически скрыть сообщение через 5 секунд
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Показать сообщение для администратора
+        function showAdminMessage(text) {
+            adminMessageDiv.textContent = text;
+            adminMessageDiv.classList.remove('hidden');
+            
+            // Автоматически скрыть сообщение через 5 секунд
+            setTimeout(() => {
+                adminMessageDiv.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

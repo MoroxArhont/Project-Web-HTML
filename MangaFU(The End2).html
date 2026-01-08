@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MangaFU - Магазин манги</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --header-color: #333333;
+            --accent-color: #e53935;
+            --border-color: #dddddd;
+            --card-bg: #f9f9f9;
+            --input-bg: #ffffff;
+            --hero-bg: linear-gradient(135deg, #e53935, #ff9966);
+        }
+        
+        body.dark-theme {
+            --bg-color: #121212;
+            --text-color: #f0f0f0;
+            --header-color: #e0e0e0;
+            --accent-color: #ff5252;
+            --border-color: #444444;
+            --card-bg: #1e1e1e;
+            --input-bg: #2d2d2d;
+            --hero-bg: linear-gradient(135deg, #ff5252, #ff9966);
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        /* Фоновая картинка с Asuka */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://abrakadabra.fun/uploads/posts/2022-02/1645778758_6-abrakadabra-fun-p-aska-oboi-na-pk-10.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            opacity: 0.15;
+            z-index: -1;
+        }
+        
+        body.dark-theme::before {
+            opacity: 0.2;
+            filter: brightness(0.7);
+        }
+        
+        header {
+            background-color: var(--card-bg);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .theme-switcher, button {
+            padding: 0.5rem 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .auth-form {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            max-width: 400px;
+            margin: 2rem auto;
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .section-title {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .manga-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .manga-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem;
+            text-align: center;
+            border-radius: 6px;
+            transition: transform 0.2s;
+        }
+        
+        .manga-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .manga-cover {
+            width: 100%;
+            height: 150px;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            background-color: #f0f0f0;
+        }
+        
+        .manga-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .manga-card:hover .manga-cover img {
+            transform: scale(1.05);
+        }
+        
+        .manga-title {
+            font-weight: bold;
+            margin: 0.5rem 0;
+            font-size: 1rem;
+            min-height: 2.5rem;
+        }
+        
+        .manga-price {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 0.5rem 0;
+        }
+        
+        .admin-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+        
+        .crud-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .message {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--accent-color);
+            background-color: var(--card-bg);
+            border-radius: 4px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        
+        nav {
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background-color: var(--card-bg);
+            border-radius: 6px;
+        }
+        
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-right: 1rem;
+            padding: 0.5rem;
+        }
+        
+        nav a:hover {
+            color: var(--accent-color);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin: 1rem 0;
+            background: var(--hero-bg);
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .cart-total {
+            font-size: 1.2rem;
+            text-align: right;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--accent-color);
+        }
+        
+        .order-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+        
+        .manga-genre {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin: 0.1rem;
+        }
+        
+        .manga-info {
+            font-size: 0.8rem;
+            margin: 0.3rem 0;
+            color: #666;
+        }
+        
+        body.dark-theme .manga-info {
+            color: #aaa;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .icon {
+            font-size: 1.2rem;
+            margin-right: 0.3rem;
+        }
+        
+        .loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        body.dark-theme .loading {
+            background: linear-gradient(90deg, #2a2a2a 25%, #333333 50%, #2a2a2a 75%);
+        }
+        
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-color), #ff9966);
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        /* Специальный стиль для фона Evangelion */
+        .evangelion-bg {
+            background-size: cover !important;
+            background-position: center !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><span class="icon">📚</span>MangaFU</div>
+        <div class="user-info">
+            <span id="current-user">Гость</span>
+            <span id="user-role" class="role-badge hidden">Гость</span>
+            <div class="auth-buttons">
+                <button id="auth-toggle" onclick="toggleAuthForm()">Войти</button>
+                <button id="logout-btn" class="hidden" onclick="logout()">Выйти</button>
+            </div>
+            <button class="theme-switcher" onclick="toggleTheme()" id="theme-btn">Темная тема</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Герой секция -->
+        <div class="hero">
+            <h1><span class="icon">🌟</span>Окунись в мир манги!</h1>
+            <p>Коллекционируй свои любимые истории и стань частью сообщества ценителей</p>
+            <button onclick="scrollToManga()">Смотреть каталог</button>
+        </div>
+        
+        <nav>
+            <a href="#manga-list"><span class="icon">📖</span>Каталог манги</a>
+            <a href="#cart" id="cart-link"><span class="icon">🛒</span>Корзина</a>
+            <a href="#orders" id="orders-link" class="hidden"><span class="icon">📦</span>Мои заказы</a>
+            <a href="#admin-panel" id="admin-link" class="hidden"><span class="icon">⚙️</span>Админ-панель</a>
+        </nav>
+        
+        <!-- Форма авторизации -->
+        <div id="auth-form" class="auth-form hidden">
+            <h2><span class="icon">🔐</span>Вход в систему</h2>
+            <form onsubmit="handleAuth(event)">
+                <div class="form-group">
+                    <label for="username">Имя пользователя:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Роль:</label>
+                    <select id="role" name="role">
+                        <option value="user">Пользователь</option>
+                        <option value="admin">Администратор</option>
+                        <option value="moderator">Модератор</option>
+                    </select>
+                </div>
+                <button type="submit">Войти</button>
+            </form>
+            <p>Для демонстрации используйте любые данные. Роль влияет на доступные функции.</p>
+        </div>
+        
+        <!-- Главная страница -->
+        <div id="main-content">
+            <!-- Каталог манги -->
+            <h2 id="manga-list" class="section-title"><span class="icon">📚</span>Популярная манга</h2>
+            <div class="manga-grid">
+                <!-- One Piece -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/OIP.kc2zWBerub9RXFgvMq9higHaKj?w=126&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="One Piece" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">One Piece</div>
+                    <div class="manga-info">Том 1-100 • Эйчиро Ода</div>
+                    <div>
+                        <span class="manga-genre">Приключения</span>
+                        <span class="manga-genre">Комедия</span>
+                    </div>
+                    <div class="manga-price">500 руб./том</div>
+                    <button onclick="addToCart('One Piece', 1, 500)">В корзину</button>
+                </div>
+                
+                <!-- Attack on Titan -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/OIP.lU979i-SpZt1cjQJU7gBEgHaKa?w=189&h=266&c=7&r=0&o=7&pid=1.7&rm=3" alt="Attack on Titan" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">Attack on Titan</div>
+                    <div class="manga-info">Том 1-34 • Хадзиме Исаяма</div>
+                    <div>
+                        <span class="manga-genre">Ужасы</span>
+                        <span class="manga-genre">Драма</span>
+                    </div>
+                    <div class="manga-price">450 руб./том</div>
+                    <button onclick="addToCart('Attack on Titan', 1, 450)">В корзину</button>
+                </div>
+                
+                <!-- Naruto -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/OIP.X5MK4YPjCHA1ywDAdxO7KwHaLH?w=189&h=284&c=7&r=0&o=7&pid=1.7&rm=3" alt="Naruto" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">Naruto</div>
+                    <div class="manga-info">Том 1-72 • Масаши Кишимото</div>
+                    <div>
+                        <span class="manga-genre">Боевик</span>
+                        <span class="manga-genre">Приключения</span>
+                    </div>
+                    <div class="manga-price">400 руб./том</div>
+                    <button onclick="addToCart('Naruto', 1, 400)">В корзину</button>
+                </div>
+                
+                <!-- My Hero Academia -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/OIP.X0VFQTfJl9CuqVVRTXb4KAHaKY?w=189&h=265&c=7&r=0&o=7&pid=1.7&rm=3" alt="My Hero Academia" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">My Hero Academia</div>
+                    <div class="manga-info">Том 1-35 • Кохей Хорикши</div>
+                    <div>
+                        <span class="manga-genre">Супергерои</span>
+                        <span class="manga-genre">Боевик</span>
+                    </div>
+                    <div class="manga-price">480 руб./том</div>
+                    <button onclick="addToCart('My Hero Academia', 1, 480)">В корзину</button>
+                </div>
+                
+                <!-- Demon Slayer -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/OIP.IPqjds1N8e5xUzjaaEtDwgHaJf?w=189&h=243&c=7&r=0&o=7&pid=1.7&rm=3" alt="Demon Slayer" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">Demon Slayer</div>
+                    <div class="manga-info">Том 1-23 • Койохару Готогэ</div>
+                    <div>
+                        <span class="manga-genre">Фэнтези</span>
+                        <span class="manga-genre">Боевик</span>
+                    </div>
+                    <div class="manga-price">520 руб./том</div>
+                    <button onclick="addToCart('Demon Slayer', 1, 520)">В корзину</button>
+                </div>
+                
+                <!-- Tokyo Ghoul -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/R.2784dc0c6ef5536fca69efcff40f8dd5?rik=KKkYrC8kcEJ2Mw&riu=http%3a%2f%2fotakunationangola.com%2fcdn%2fshop%2fcollections%2fp11999443_b_v8_ab.jpg%3fv%3d1713073161&ehk=Qm2qRGD2W7U%2bkPexukfjcCt%2boD2Bl87MpVR2nIccuqM%3d&risl=&pid=ImgRaw&r=0" alt="Tokyo Ghoul" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">Tokyo Ghoul</div>
+                    <div class="manga-info">Том 1-14 • Суи Ишида</div>
+                    <div>
+                        <span class="manga-genre">Ужасы</span>
+                        <span class="manga-genre">Драма</span>
+                    </div>
+                    <div class="manga-price">470 руб./том</div>
+                    <button onclick="addToCart('Tokyo Ghoul', 1, 470)">В корзину</button>
+                </div>
+                
+                <!-- Jujutsu Kaisen -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/OIP.nMauVXTrCWVtFPaSINDPwQHaKe?w=189&h=267&c=7&r=0&o=7&pid=1.7&rm=3" alt="Jujutsu Kaisen" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">Jujutsu Kaisen</div>
+                    <div class="manga-info">Том 1-20 • Гэгэ Акутами</div>
+                    <div>
+                        <span class="manga-genre">Боевик</span>
+                        <span class="manga-genre">Ужасы</span>
+                    </div>
+                    <div class="manga-price">490 руб./том</div>
+                    <button onclick="addToCart('Jujutsu Kaisen', 1, 490)">В корзину</button>
+                </div>
+                
+                <!-- Death Note -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/OIP.79QrvhjWS7qUKU9fRvReygHaKD?w=189&h=257&c=7&r=0&o=7&pid=1.7&rm=3" alt="Death Note" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">Death Note</div>
+                    <div class="manga-info">Том 1-12 • Цугуми Ооба</div>
+                    <div>
+                        <span class="manga-genre">Детектив</span>
+                        <span class="manga-genre">Триллер</span>
+                    </div>
+                    <div class="manga-price">430 руб./том</div>
+                    <button onclick="addToCart('Death Note', 1, 430)">В корзину</button>
+                </div>
+                
+                <!-- NEON GENESIS EVANGELION - НОВАЯ ДОБАВКА -->
+                <div class="manga-card">
+                    <div class="manga-cover">
+                        <img src="https://th.bing.com/th/id/OIP.nP_rgjqOTTFdIDtreUL4aAHaLH?w=189&h=284&c=7&r=0&o=7&pid=1.7&rm=3" alt="Neon Genesis Evangelion" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="manga-title">Neon Genesis Evangelion</div>
+                    <div class="manga-info">Том 1-14 • Ёсиюки Садамото</div>
+                    <div>
+                        <span class="manga-genre">Меха</span>
+                        <span class="manga-genre">Психология</span>
+                        <span class="manga-genre">Драма</span>
+                    </div>
+                    <div class="manga-price">550 руб./том</div>
+                    <button onclick="addToCart('Neon Genesis Evangelion', 1, 550)">В корзину</button>
+                </div>
+            </div>
+            
+            <!-- Корзина -->
+            <h2 id="cart" class="section-title"><span class="icon">🛒</span>Корзина</h2>
+            <div id="cart-items">
+                <p>Корзина пуста. Добавьте товары из каталога.</p>
+            </div>
+            <div id="cart-actions" class="hidden">
+                <button onclick="checkout()">Оформить заказ</button>
+                <button onclick="clearCart()">Очистить корзину</button>
+            </div>
+            
+            <!-- Заказы пользователя -->
+            <div id="user-orders" class="hidden">
+                <h2 id="orders" class="section-title"><span class="icon">📦</span>Мои заказы</h2>
+                <div id="orders-list">
+                    <!-- Здесь будут отображаться заказы пользователя -->
+                </div>
+            </div>
+            
+            <!-- Админ-панель -->
+            <div id="admin-panel" class="admin-panel hidden">
+                <h2><span class="icon">⚙️</span>Административная панель</h2>
+                <p>Добро пожаловать в админ-панель MangaFU. Здесь вы можете управлять каталогом манги, заказами и пользователями.</p>
+                
+                <!-- CRUD операции -->
+                <h3>Управление каталогом манги</h3>
+                <div class="crud-actions">
+                    <button onclick="showCreateForm()">Добавить мангу</button>
+                    <button onclick="showEditForm()">Редактировать мангу</button>
+                    <button onclick="showDeleteForm()">Удалить мангу</button>
+                </div>
+                
+                <div id="create-form" class="auth-form hidden">
+                    <h4>Добавить новую мангу</h4>
+                    <form onsubmit="createManga(event)">
+                        <div class="form-group">
+                            <label for="manga-title">Название:</label>
+                            <input type="text" id="manga-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="manga-author">Автор:</label>
+                            <input type="text" id="manga-author" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="manga-price">Цена:</label>
+                            <input type="number" id="manga-price" required>
+                        </div>
+                        <button type="submit">Добавить</button>
+                        <button type="button" onclick="hideCreateForm()">Отмена</button>
+                    </form>
+                </div>
+                
+                <div id="edit-form" class="auth-form hidden">
+                    <h4>Редактировать мангу</h4>
+                    <form onsubmit="updateManga(event)">
+                        <div class="form-group">
+                            <label for="edit-manga-id">ID манги:</label>
+                            <input type="text" id="edit-manga-id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-manga-title">Новое название:</label>
+                            <input type="text" id="edit-manga-title">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-manga-price">Новая цена:</label>
+                            <input type="number" id="edit-manga-price">
+                        </div>
+                        <button type="submit">Обновить</button>
+                        <button type="button" onclick="hideEditForm()">Отмена</button>
+                    </form>
+                </div>
+                
+                <div id="delete-form" class="auth-form hidden">
+                    <h4>Удалить мангу</h4>
+                    <form onsubmit="deleteManga(event)">
+                        <div class="form-group">
+                            <label for="delete-manga-id">ID манги для удаления:</label>
+                            <input type="text" id="delete-manga-id" required>
+                        </div>
+                        <button type="submit">Удалить</button>
+                        <button type="button" onclick="hideDeleteForm()">Отмена</button>
+                    </form>
+                </div>
+                
+                <div id="admin-message" class="message hidden"></div>
+            </div>
+            
+            <div id="message" class="message hidden"></div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>MangaFU &copy; 2023. Все права на мангу принадлежат их правообладателям.</p>
+        <p>Это демонстрационный сайт для учебных целей.</p>
+    </footer>
+
+    <script>
+        let currentUser = null;
+        let currentRole = 'guest';
+        let cart = [];
+        let orders = [];
+        let isDarkTheme = false;
+        
+        const authForm = document.getElementById('auth-form');
+        const authToggle = document.getElementById('auth-toggle');
+        const logoutBtn = document.getElementById('logout-btn');
+        const currentUserSpan = document.getElementById('current-user');
+        const userRoleSpan = document.getElementById('user-role');
+        const cartLink = document.getElementById('cart-link');
+        const ordersLink = document.getElementById('orders-link');
+        const adminLink = document.getElementById('admin-link');
+        const userOrders = document.getElementById('user-orders');
+        const adminPanel = document.getElementById('admin-panel');
+        const cartItems = document.getElementById('cart-items');
+        const cartActions = document.getElementById('cart-actions');
+        const messageDiv = document.getElementById('message');
+        const adminMessageDiv = document.getElementById('admin-message');
+        const ordersList = document.getElementById('orders-list');
+        const themeBtn = document.getElementById('theme-btn');
+        
+        // Функция для обработки ошибок загрузки изображений
+        function handleImageError(img) {
+            console.log('Ошибка загрузки изображения:', img.src);
+            img.style.display = 'none';
+            const coverDiv = img.parentElement;
+            coverDiv.classList.add('no-image');
+            
+            // Добавляем аббревиатуру названия манги
+            const title = img.alt;
+            const abbreviations = {
+                'One Piece': 'OP',
+                'Attack on Titan': 'AOT',
+                'Naruto': 'N',
+                'My Hero Academia': 'MHA',
+                'Demon Slayer': 'DS',
+                'Tokyo Ghoul': 'TG',
+                'Jujutsu Kaisen': 'JJK',
+                'Death Note': 'DN',
+                'Neon Genesis Evangelion': 'NGE'
+            };
+            
+            if (abbreviations[title]) {
+                coverDiv.textContent = abbreviations[title];
+            } else {
+                coverDiv.textContent = title.split(' ').map(word => word[0]).join('');
+            }
+        }
+        
+        // Проверка загрузки фона
+        function checkBackgroundLoad() {
+            const bgTest = new Image();
+            bgTest.src = 'https://abrakadabra.fun/uploads/posts/2022-02/1645778758_6-abrakadabra-fun-p-aska-oboi-na-pk-10.jpg';
+            
+            bgTest.onload = function() {
+                console.log('Фоновое изображение (Asuka) загружено успешно');
+                // Добавляем класс для лучшего отображения фона Evangelion
+                document.body.classList.add('evangelion-bg');
+            };
+            
+            bgTest.onerror = function() {
+                console.log('Ошибка загрузки фонового изображения, используем простой фон');
+            };
+        }
+        
+        // ИНИЦИАЛИЗАЦИЯ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем загрузку фона
+            checkBackgroundLoad();
+            
+            // Загружаем сохраненную тему
+            const savedTheme = localStorage.getItem('mangafu_theme');
+            if (savedTheme === 'dark') {
+                isDarkTheme = true;
+                document.body.classList.add('dark-theme');
+                themeBtn.textContent = 'Светлая тема';
+            }
+            
+            updateUI();
+            
+            // Предзагрузка изображений для лучшего UX
+            preloadImages();
+        });
+        
+        // Предзагрузка изображений
+        function preloadImages() {
+            const imageUrls = [
+                'https://th.bing.com/th/id/OIP.kc2zWBerub9RXFgvMq9higHaKj?w=126&h=180&c=7&r=0&o=7&pid=1.7&rm=3',
+                'https://th.bing.com/th/id/OIP.lU979i-SpZt1cjQJU7gBEgHaKa?w=189&h=266&c=7&r=0&o=7&pid=1.7&rm=3',
+                'https://th.bing.com/th/id/OIP.X5MK4YPjCHA1ywDAdxO7KwHaLH?w=189&h=284&c=7&r=0&o=7&pid=1.7&rm=3',
+                'https://th.bing.com/th/id/OIP.X0VFQTfJl9CuqVVRTXb4KAHaKY?w=189&h=265&c=7&r=0&o=7&pid=1.7&rm=3',
+                'https://th.bing.com/th/id/OIP.IPqjds1N8e5xUzjaaEtDwgHaJf?w=189&h=243&c=7&r=0&o=7&pid=1.7&rm=3',
+                'https://th.bing.com/th/id/R.2784dc0c6ef5536fca69efcff40f8dd5?rik=KKkYrC8kcEJ2Mw&riu=http%3a%2f%2fotakunationangola.com%2fcdn%2fshop%2fcollections%2fp11999443_b_v8_ab.jpg%3fv%3d1713073161&ehk=Qm2qRGD2W7U%2bkPexukfjcCt%2boD2Bl87MpVR2nIccuqM%3d&risl=&pid=ImgRaw&r=0',
+                'https://th.bing.com/th/id/OIP.nMauVXTrCWVtFPaSINDPwQHaKe?w=189&h=267&c=7&r=0&o=7&pid=1.7&rm=3',
+                'https://th.bing.com/th/id/OIP.79QrvhjWS7qUKU9fRvReygHaKD?w=189&h=257&c=7&r=0&o=7&pid=1.7&rm=3',
+                'https://th.bing.com/th/id/OIP.nP_rgjqOTTFdIDtreUL4aAHaLH?w=189&h=284&c=7&r=0&o=7&pid=1.7&rm=3' // Evangelion
+            ];
+            
+            imageUrls.forEach(url => {
+                const img = new Image();
+                img.src = url;
+                img.onerror = function() {
+                    console.log('Ошибка предзагрузки:', url);
+                };
+            });
+        }
+        
+        // ПЕРЕКЛЮЧЕНИЕ ТЕМЫ
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('dark-theme', isDarkTheme);
+            themeBtn.textContent = isDarkTheme ? 'Светлая тема' : 'Темная тема';
+            
+            localStorage.setItem('mangafu_theme', isDarkTheme ? 'dark' : 'light');
+        }
+        
+        function scrollToManga() {
+            document.getElementById('manga-list').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function toggleAuthForm() {
+            authForm.classList.toggle('hidden');
+        }
+        
+        function handleAuth(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            
+            currentUser = username;
+            currentRole = role;
+            
+            sessionStorage.setItem('mangafu_user', username);
+            sessionStorage.setItem('mangafu_role', role);
+            
+            showMessage(`Добро пожаловать, ${username}! Вы вошли как ${getRoleName(role)}.`);
+            updateUI();
+            authForm.classList.add('hidden');
+        }
+        
+        function logout() {
+            currentUser = null;
+            currentRole = 'guest';
+            
+            sessionStorage.removeItem('mangafu_user');
+            sessionStorage.removeItem('mangafu_role');
+            
+            showMessage('Вы вышли из системы.');
+            updateUI();
+        }
+        
+        function updateUI() {
+            const savedUser = sessionStorage.getItem('mangafu_user');
+            const savedRole = sessionStorage.getItem('mangafu_role');
+            
+            if (savedUser && savedRole) {
+                currentUser = savedUser;
+                currentRole = savedRole;
+            }
+            
+            if (currentUser) {
+                currentUserSpan.textContent = currentUser;
+                userRoleSpan.textContent = getRoleName(currentRole);
+                userRoleSpan.classList.remove('hidden');
+                authToggle.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+            } else {
+                currentUserSpan.textContent = 'Гость';
+                userRoleSpan.classList.add('hidden');
+                authToggle.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+            }
+            
+            cartLink.classList.toggle('hidden', !currentUser);
+            
+            const showOrders = currentUser && (currentRole === 'user' || currentRole === 'admin' || currentRole === 'moderator');
+            ordersLink.classList.toggle('hidden', !showOrders);
+            userOrders.classList.toggle('hidden', !showOrders);
+            
+            const showAdminPanel = currentRole === 'admin' || currentRole === 'moderator';
+            adminLink.classList.toggle('hidden', !showAdminPanel);
+            adminPanel.classList.toggle('hidden', !showAdminPanel);
+            
+            updateCartDisplay();
+            updateOrdersDisplay();
+        }
+        
+        function getRoleName(role) {
+            switch(role) {
+                case 'admin': return 'Администратор';
+                case 'moderator': return 'Модератор';
+                case 'user': return 'Пользователь';
+                default: return 'Гость';
+            }
+        }
+        
+        function addToCart(mangaTitle, quantity, price) {
+            if (!currentUser) {
+                showMessage('Для добавления товаров в корзину необходимо авторизоваться.');
+                toggleAuthForm();
+                return;
+            }
+            
+            const existingItem = cart.find(item => item.title === mangaTitle);
+            
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    title: mangaTitle,
+                    quantity: quantity,
+                    price: price
+                });
+            }
+            
+            showMessage(`"${mangaTitle}" добавлен в корзину.`);
+            updateCartDisplay();
+        }
+        
+        function updateCartDisplay() {
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Корзина пуста. Добавьте товары из каталога.</p>';
+                cartActions.classList.add('hidden');
+                return;
+            }
+            
+            let html = '<h3>Товары в корзине:</h3>';
+            let total = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                html += `
+                    <div class="cart-item">
+                        <div>${item.title}</div>
+                        <div>${item.quantity} шт. × ${item.price} руб.</div>
+                        <div><strong>${itemTotal} руб.</strong></div>
+                    </div>
+                `;
+            });
+            
+            html += `<div class="cart-total">Итого: <strong>${total} руб.</strong></div>`;
+            cartItems.innerHTML = html;
+            cartActions.classList.remove('hidden');
+        }
+        
+        function clearCart() {
+            cart = [];
+            showMessage('Корзина очищена.');
+            updateCartDisplay();
+        }
+        
+        function checkout() {
+            if (cart.length === 0) {
+                showMessage('Корзина пуста. Добавьте товары перед оформлением заказа.');
+                return;
+            }
+            
+            const orderId = Date.now();
+            const orderTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const order = {
+                id: orderId,
+                date: new Date().toLocaleDateString(),
+                items: [...cart],
+                total: orderTotal,
+                status: 'В обработке'
+            };
+            
+            orders.push(order);
+            cart = [];
+            
+            showMessage(`Заказ #${orderId} успешно оформлен! Сумма: ${orderTotal} руб.`);
+            updateCartDisplay();
+            updateOrdersDisplay();
+        }
+        
+        function updateOrdersDisplay() {
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p>У вас пока нет заказов.</p>';
+                return;
+            }
+            
+            let html = '<h3>История заказов:</h3>';
+            
+            orders.forEach(order => {
+                html += `
+                    <div class="order-card">
+                        <div class="manga-title">Заказ #${order.id}</div>
+                        <div class="manga-info">
+                            <span>Дата: ${order.date}</span>
+                            <span>Статус: ${order.status}</span>
+                        </div>
+                        <div>Товаров: ${order.items.length}</div>
+                        <div>Сумма: ${order.total} руб.</div>
+                    </div>
+                `;
+            });
+            
+            ordersList.innerHTML = html;
+        }
+        
+        // АДМИН-ФУНКЦИИ
+        function showCreateForm() {
+            document.getElementById('create-form').classList.remove('hidden');
+            document.getElementById('edit-form').classList.add('hidden');
+            document.getElementById('delete-form').classList.add('hidden');
+        }
+        
+        function hideCreateForm() {
+            document.getElementById('create-form').classList.add('hidden');
+        }
+        
+        function createManga(event) {
+            event.preventDefault();
+            const title = document.getElementById('manga-title').value;
+            showAdminMessage(`Манга "${title}" успешно добавлена в каталог.`);
+            document.getElementById('create-form').querySelector('form').reset();
+            hideCreateForm();
+        }
+        
+        function showEditForm() {
+            document.getElementById('edit-form').classList.remove('hidden');
+            document.getElementById('create-form').classList.add('hidden');
+            document.getElementById('delete-form').classList.add('hidden');
+        }
+        
+        function hideEditForm() {
+            document.getElementById('edit-form').classList.add('hidden');
+        }
+        
+        function updateManga(event) {
+            event.preventDefault();
+            const id = document.getElementById('edit-manga-id').value;
+            showAdminMessage(`Манга с ID ${id} успешно обновлена.`);
+            document.getElementById('edit-form').querySelector('form').reset();
+            hideEditForm();
+        }
+        
+        function showDeleteForm() {
+            document.getElementById('delete-form').classList.remove('hidden');
+            document.getElementById('create-form').classList.add('hidden');
+            document.getElementById('edit-form').classList.add('hidden');
+        }
+        
+        function hideDeleteForm() {
+            document.getElementById('delete-form').classList.add('hidden');
+        }
+        
+        function deleteManga(event) {
+            event.preventDefault();
+            const id = document.getElementById('delete-manga-id').value;
+            showAdminMessage(`Манга с ID ${id} успешно удалена из каталога.`);
+            document.getElementById('delete-form').querySelector('form').reset();
+            hideDeleteForm();
+        }
+        
+        function showMessage(text) {
+            messageDiv.textContent = text;
+            messageDiv.classList.remove('hidden');
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
+        }
+        
+        function showAdminMessage(text) {
+            adminMessageDiv.textContent = text;
+            adminMessageDiv.classList.remove('hidden');
+            setTimeout(() => {
+                adminMessageDiv.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
