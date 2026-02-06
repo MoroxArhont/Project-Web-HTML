@@ -1,0 +1,124 @@
+<Solution>
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        Random random = new Random();
+        
+        // ШАГ 1: Создаём случайную матрицу 3x3
+        int size = 3; // Можно менять размер
+        int[,] matrix = new int[size, size];
+        
+        Console.WriteLine("Создаём случайную матрицу " + size + "x" + size + ":");
+        
+        // Заполняем случайными числами от 1 до 20
+        for (int row = 0; row < size; row++)
+        {
+            for (int col = 0; col < size; col++)
+            {
+                matrix[row, col] = random.Next(1, 21); // от 1 до 20
+                Console.Write(matrix[row, col].ToString().PadLeft(3) + " ");
+            }
+            Console.WriteLine();
+        }
+        
+        // ============== ЧАСТЬ 1: СПИРАЛЬ ==============
+        Console.WriteLine("\n1. Собираем элементы по спирали:");
+        
+        int top = 0;
+        int bottom = size - 1;
+        int left = 0;
+        int right = size - 1;
+        
+        string spiral = "";
+        
+        while (top <= bottom && left <= right)
+        {
+            // 1. Вправо по верхней строке
+            for (int col = left; col <= right; col++)
+            {
+                spiral += matrix[top, col] + " ";
+            }
+            top++;
+            
+            // 2. Вниз по правому столбцу
+            for (int row = top; row <= bottom; row++)
+            {
+                spiral += matrix[row, right] + " ";
+            }
+            right--;
+            
+            if (top <= bottom)
+            {
+                // 3. Влево по нижней строке
+                for (int col = right; col >= left; col--)
+                {
+                    spiral += matrix[bottom, col] + " ";
+                }
+                bottom--;
+            }
+            
+            if (left <= right)
+            {
+                // 4. Вверх по левому столбцу
+                for (int row = bottom; row >= top; row--)
+                {
+                    spiral += matrix[row, left] + " ";
+                }
+                left++;
+            }
+        }
+        
+        Console.WriteLine("Спираль: " + spiral);
+        
+        // ============== ЧАСТЬ 2: МИНИМУМ НИЖЕ ДИАГОНАЛИ ==============
+        Console.WriteLine("\n2. Ищем минимальный элемент НИЖЕ побочной диагонали:");
+        
+        int minValue = 1000; // большое число
+        int minRow = -1;
+        int minCol = -1;
+        
+        // Показываем какие элементы проверяем
+        Console.WriteLine("Элементы ниже побочной диагонали (где row + col > " + (size-1) + "):");
+        
+        for (int row = 0; row < size; row++)
+        {
+            for (int col = 0; col < size; col++)
+            {
+                if (row + col > size - 1)
+                {
+                    Console.Write($"  [{row},{col}]={matrix[row, col]}  ");
+                    
+                    if (matrix[row, col] < minValue)
+                    {
+                        minValue = matrix[row, col];
+                        minRow = row;
+                        minCol = col;
+                    }
+                }
+            }
+        }
+        
+        Console.WriteLine($"\n\nМинимальный элемент ниже диагонали: {minValue}");
+        Console.WriteLine($"Позиция: строка {minRow}, столбец {minCol}");
+        
+        // ============== БОНУС: Рисуем матрицу с подсветкой ==============
+        Console.WriteLine("\n3. Визуализация (ниже диагонали - в скобках):");
+        for (int row = 0; row < size; row++)
+        {
+            for (int col = 0; col < size; col++)
+            {
+                if (row + col > size - 1)
+                    Console.Write("[" + matrix[row, col].ToString().PadLeft(2) + "] ");
+                else if (row + col == size - 1)
+                    Console.Write(" " + matrix[row, col].ToString().PadLeft(2) + "  "); // диагональ
+                else
+                    Console.Write(" " + matrix[row, col].ToString().PadLeft(2) + "  ");
+            }
+            Console.WriteLine();
+        }
+    }
+}
+</Solution>
